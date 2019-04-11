@@ -22,6 +22,7 @@ configure(allprojects - docProjects) {
     apply plugin: 'idea'
     apply plugin: 'javadocHotfix'
     apply plugin: "maven"
+    apply plugin: "signing"
 
     group = 'org.springframework.social'
 
@@ -178,6 +179,55 @@ configure(subprojects - docProjects) { subproject ->
     configure([test, springReleaseTest, springSnapshotTest]) {
         systemProperties['springVersion'] = springVersion
     }
+
+    signing {
+      sign configurations.archives
+    }
+
+
+    uploadArchives {
+      repositories {
+        mavenDeployer {
+          repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") { authentication(userName: "", password: "") }
+          configuration = configurations.archives
+
+          beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+          pom {
+            groupId = 'com.sematext'
+            artifactId = project.name
+            version = project.version
+          }
+
+          pom.project {
+            name 'spring-social-facebook'
+            description 'spring-social-facebook'
+            url 'https://github.com/sematext/spring-social-facebook'
+            packaging 'jar'
+    
+            scm {
+              url 'https://github.com/sematext/spring-social-facebook'
+            }
+    
+            licenses {
+              license {
+                name 'Apache License ersion 2.0'
+                url 'https://github.com/sematext/spring-social-facebook/blob/master/LICENSE'
+                distribution 'repo'
+              }
+            }
+    
+            developers {
+              developer {
+                id 'none'
+                name 'None'
+                email 'noreply@sematext.com'
+              }
+            }
+          }
+        }
+      }
+    }
 }
 
 
@@ -192,6 +242,9 @@ project('spring-social-facebook') {
         compile ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
         compile ("javax.servlet:javax.servlet-api:$servletApiVersion", provided)
         testCompile ("org.springframework:spring-test:$springVersion")
+        testCompile ("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
+        testCompile ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+        testCompile ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
     }
 }
 
@@ -203,12 +256,15 @@ project('spring-social-facebook-web') {
         compile ("org.springframework.social:spring-social-core:$springSocialVersion", optional)
         compile project(':spring-social-facebook', optional)
         compile ("org.springframework.security:spring-security-crypto:$springSecurityCryptoVersion", optional)
-        compile ("com.fasterxml.jackson.core:jackson-core:$jacksonVersion", optional)
-        compile ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion", optional)
-        compile ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion", optional)
+        compile ("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
+        compile ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+        compile ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
         compile ("javax.servlet:javax.servlet-api:$servletApiVersion", provided)
         compile ("javax.servlet.jsp:javax.servlet.jsp-api:$jspApiVersion", provided)
         testCompile ("org.springframework:spring-test:$springVersion")
+        testCompile ("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
+        testCompile ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+        testCompile ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
     }
 }
 
